@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   OneToOne,
   ManyToOne,
+  ManyToMany,
 } from "typeorm";
 import { ObjectType, Field, ID, InputType } from "type-graphql";
 import { Comment } from "./Comment";
@@ -91,6 +92,10 @@ export class User {
   @Field(() => [PointOfInterest], { nullable: true })
   pointOfInterests: PointOfInterest[];
 
+  @ManyToMany(() => PointOfInterest, (pointOfInterest) => pointOfInterest.users)
+  @Field(() => [PointOfInterest], { nullable: true })
+  favorites: PointOfInterest[];
+
   @OneToMany(() => City, (city) => city.createdBy, { nullable: true })
   @Field(() => [City], { nullable: true })
   cities: City[];
@@ -106,7 +111,7 @@ export class UserInput {
   username: string;
 
   @Field({ nullable: true })
-  // 1 maj ... 8 caractères minimum
+  // 1 maj 1 chiffre ... 8 caractères minimum
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,64}$/)
   password: string;
 

@@ -109,6 +109,11 @@ export class PointOfInterest {
   @JoinTable()
   @Field(() => [Category], { nullable: true })
   categories: Category[];
+
+  @ManyToMany(() => User, (user) => user.favorites)
+  @JoinTable()
+  @Field(() => User, { nullable: true })
+  users: User[];
 }
 
 @InputType()
