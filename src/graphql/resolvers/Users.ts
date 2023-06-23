@@ -9,6 +9,10 @@ import {
 } from "type-graphql";
 import { DeleteResult } from "typeorm";
 import { User, UserInput } from "../../Entities/User";
+import {
+  PointOfInterest,
+  PointOfInterestInput,
+} from "../../Entities/PointOfInterest";
 import dataSource from "../../utils";
 import { hash, verify } from "argon2";
 import { usersRelations } from "../../utils/relations";
@@ -50,9 +54,7 @@ export class UserResolver {
     @Arg("email") email: string,
     @Arg("password") password: string
   ): Promise<string | null> {
-
     try {
-
       const user = await dataSource
         .getRepository(User)
         .findOne({ where: { email } });
@@ -60,10 +62,13 @@ export class UserResolver {
         return null;
       }
       if (await verify(user.password, password)) {
-
-        const token = sign({ userId: user.id, userRole: user.role }, 'supersecret', {
-          expiresIn: "2h",
-        });
+        const token = sign(
+          { userId: user.id, userRole: user.role },
+          "supersecret",
+          {
+            expiresIn: "2h",
+          }
+        );
         return token;
       } else {
         return null;
@@ -112,7 +117,7 @@ export class UserResolver {
     if (data.role !== null || data.email !== null || data.username !== null) {
       updateUser.role = data.role;
       updateUser.email = data.email;
-      updateUser.username = data.username
+      updateUser.username = data.username;
     }
     updateUser.updatedById = data.updatedById;
     return await dataSource.getRepository(User).save(updateUser);
@@ -127,5 +132,50 @@ export class UserResolver {
       .delete()
       .from(User)
       .execute();
+  }
+
+  ////// AJOUTER UN POINT D'INTÉRÊT DANS LES FAVORIS ////////
+  @Authorized()
+  @Mutation(() => User)
+  async addFavorite(
+    @Arg("userId", () => ID) userId: number,
+    @Arg("pointOfInterestId", () => ID) pointOfInterestId: number
+  ): Promise<User | null> {
+    const user = await dataSource
+      .getRepository(User)
+      .findOne({ where: { id: userId }, relations: ["favorites"] });
+    const pointOfInterest = await dataSource
+      .getRepository(PointOfInterest)
+      .findOne({ where: { id: pointOfInterestId } });
+
+    if (!user || !pointOfInterest) {
+      throw new Error("User or PointsOfInterest not found");
+    }
+
+    user.favorites.push(pointOfInterest);
+
+    return await dataSource.getRepository(User).save(user);
+  }
+
+  /////// SUPPRIMER UN POINT D'INTÉRÊT DES FAVORIS /////////
+  @Authorized()
+  @Mutation(() => User)
+  async removeFavorite(
+    @Arg("userId", () => ID) userId: number,
+    @Arg("pointOfInterestId", () => ID) pointOfInterestId: number
+  ): Promise<User | null> {
+    const user = await dataSource
+      .getRepository(User)
+      .findOne({ where: { id: userId }, relations: ["favorites"] });
+
+    if (!user) {
+      return null;
+    }
+
+    user.favorites = user.favorites.filter(
+      (favorite) => favorite.id !== pointOfInterestId
+    );
+
+    return await dataSource.getRepository(User).save(user);
   }
 }
