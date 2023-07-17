@@ -64,7 +64,7 @@ export class UserResolver {
       if (await verify(user.password, password)) {
         const token = sign(
           { userId: user.id, userRole: user.role },
-          "supersecret",
+          process.env.JWT_SECRET_KEY || "supersecret",
           {
             expiresIn: "2h",
           }
@@ -134,7 +134,27 @@ export class UserResolver {
       .execute();
   }
 
-  ////// AJOUTER UN POINT D'INTÉRÊT DANS LES FAVORIS ////////
+  ////// QUERY FIND ALL POIs IN FAVORITES ////////
+  @Authorized()
+  @Query(() => [PointOfInterest], { nullable: true })
+  async findAllFavorites(
+    @Arg("userId", () => ID) userId: number
+  ): Promise<PointOfInterest[] | null> {
+    const user = await dataSource
+      .getRepository(User)
+      .findOne({ where: { id: userId }, relations: ["favorites"] });
+
+    if (user != null) {
+      return user.favorites;
+    } else {
+      return null;
+    }
+    /* return await dataSource
+      .getRepository(PointOfInterest)
+      .find({ where: { users: { id: userId } } }); */
+  }
+
+  ////// ADD A POI IN FAVORITES ////////
   @Authorized()
   @Mutation(() => User)
   async addFavorite(
@@ -157,13 +177,14 @@ export class UserResolver {
     return await dataSource.getRepository(User).save(user);
   }
 
-  /////// SUPPRIMER UN POINT D'INTÉRÊT DES FAVORIS /////////
+  /////// DELETE A POI IN FAVORITE /////////
   @Authorized()
   @Mutation(() => User)
   async removeFavorite(
     @Arg("userId", () => ID) userId: number,
     @Arg("pointOfInterestId", () => ID) pointOfInterestId: number
   ): Promise<User | null> {
+    pointOfInterestId = Number(pointOfInterestId);
     const user = await dataSource
       .getRepository(User)
       .findOne({ where: { id: userId }, relations: ["favorites"] });
@@ -172,9 +193,9 @@ export class UserResolver {
       return null;
     }
 
-    user.favorites = user.favorites.filter(
-      (favorite) => favorite.id !== pointOfInterestId
-    );
+    user.favorites = user.favorites.filter((favorite) => {
+      return favorite.id !== pointOfInterestId;
+    });
 
     return await dataSource.getRepository(User).save(user);
   }

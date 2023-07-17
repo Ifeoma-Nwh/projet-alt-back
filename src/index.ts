@@ -4,14 +4,14 @@ import "reflect-metadata";
 import { upload } from "./rest/routes";
 import bodyParser from "body-parser";
 import express from "express";
-import cors from 'cors';
+import cors from "cors";
 
 const app = express();
-const http = require('http').createServer(app)
+const http = require("http").createServer(app);
 const port = 3002;
-const io = require('socket.io')(http)
+const io = require("socket.io")(http);
 
-app.use(cors({ origin: "http://localhost:3000" }))
+app.use(cors({ origin: "http://localhost:3000" }));
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,7 +38,6 @@ app.use("/api/image-upload", upload);
 //   }
 // });
 
-
 // http.listen(port, () => {
 //   console.log(`🍃 🍃 🍃 [SERVER STARTED ON PORT ${port}] 🍃 🍃 🍃`);
 // })
@@ -58,28 +57,30 @@ const expressServer = () => {
   });
 };
 
-let users: any = []
+let users: any = [];
 
 io.on("connection", (socket: any) => {
   /* socket object may be used to send specific messages to the new connected client */
   console.log(`🟢: ${socket.id} user just connected!`);
 
-  socket.on('message', (data: any) => {
-    io.emit('messageResponse', data);
+  socket.on("message", (data: any) => {
+    io.emit("messageResponse", data);
   });
 
-  socket.on('typing', (data: any) => socket.broadcast.emit('typingResponse', data));
+  socket.on("typing", (data: any) =>
+    socket.broadcast.emit("typingResponse", data)
+  );
 
-  socket.on('newUser', (data: any) => {
-    users.push(data)
-    io.emit('newUserResponse', users);
+  socket.on("newUser", (data: any) => {
+    users.push(data);
+    io.emit("newUserResponse", users);
   });
 
-  socket.on('disconnect', () => {
+  socket.on("disconnect", () => {
     users = users.filter((user: any) => {
-      return user.socketID !== socket.id
-    })
-    io.emit('newUserResponse', users);
+      return user.socketID !== socket.id;
+    });
+    io.emit("newUserResponse", users);
     console.log(`🔴: A user disconnected : ${users}`);
     socket.disconnect();
   });
