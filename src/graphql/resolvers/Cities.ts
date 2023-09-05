@@ -7,7 +7,7 @@ import { removeAccents } from "../../utils/utils";
 @Resolver()
 export class CityResolver {
   ///////// QUERY FIND ALL CITIES /////////////
-  @Authorized()
+  /*  @Authorized() */
   @Query(() => [City], { nullable: true })
   async Cities(): Promise<City[]> {
     const Cities = await dataSource.getRepository(City).find({
@@ -16,7 +16,7 @@ export class CityResolver {
     return Cities;
   }
   ///////// QUERY FIND ONE CITY /////////////
-  @Authorized()
+  /* @Authorized() */
   @Query(() => City, { nullable: true })
   async city(@Arg("id", () => ID) id: number): Promise<City | null> {
     const city = await dataSource
@@ -25,7 +25,7 @@ export class CityResolver {
     return city;
   }
   //////////  QUERY CITY BY NAME //////////
-  @Authorized()
+  /* @Authorized() */
   @Query(() => City, { nullable: true })
   async cityByName(@Arg("name") name: string): Promise<City | null> {
     const lowerCaseName = removeAccents(name.toLowerCase());
