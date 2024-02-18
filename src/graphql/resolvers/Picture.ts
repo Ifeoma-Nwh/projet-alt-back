@@ -6,7 +6,6 @@ import { picturesRelation } from "../../utils/relations";
 
 @Resolver()
 export class PictureResolver {
-  @Authorized()
   @Query(() => [Picture], { nullable: true })
   async pictures(): Promise<Picture[]> {
     const pictures = await dataSource.getRepository(Picture).find({
@@ -14,7 +13,7 @@ export class PictureResolver {
     });
     return pictures;
   }
-  @Authorized()
+
   @Query(() => Picture, { nullable: true })
   async pictureByPOIId(
     @Arg("pointOfInterestId") pointOfInterestId: number
