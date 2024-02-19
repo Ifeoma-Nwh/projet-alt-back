@@ -11,7 +11,6 @@ import { pointOfInterestRelations } from "../../utils/relations";
 @Resolver()
 export class PointOfInterestResolver {
   ///////// QUERY FIND ALL PointOfinterests /////////////
-  // @Authorized()
   @Query(() => [PointOfInterest], { nullable: true })
   async PointOfinterests(): Promise<PointOfInterest[]> {
     const PointOfinterests = await dataSource
@@ -22,7 +21,6 @@ export class PointOfInterestResolver {
     return PointOfinterests;
   }
   ///////// QUERY FIND ONE PointOfInterest /////////////
-  // @Authorized()
   @Query(() => PointOfInterest, { nullable: true })
   async pointOfInterest(
     @Arg("id", () => ID) id: number
@@ -45,7 +43,7 @@ export class PointOfInterestResolver {
     const datas = { ...data, categories: [category] };
     return await dataSource.getRepository(PointOfInterest).save(datas);
   }
-  ///////// MUTATION DELETE POINT IF INTEREST /////////////
+  ///////// MUTATION DELETE POINT OF INTEREST /////////////
   @Authorized([1])
   @Mutation(() => PointOfInterest, { nullable: true })
   async deletePointOfInterest(
@@ -60,7 +58,6 @@ export class PointOfInterestResolver {
       .execute();
   }
   ///////// MUTATION UPDATE POINT OF INTEREST/////////////
-  @Authorized([1])
   @Mutation(() => PointOfInterest, { nullable: true })
   async updatePointOfInterest(
     @Arg("id", () => ID) id: number,
@@ -76,7 +73,14 @@ export class PointOfInterestResolver {
     if (updatePointOfInterest === null) {
       return null;
     }
-    if (data.description != null || data.adress != null || data.latitude != null || data.name != null || data.longitude != null || data.cityId != null) {
+    if (
+      data.description != null ||
+      data.adress != null ||
+      data.latitude != null ||
+      data.name != null ||
+      data.longitude != null ||
+      data.cityId != null
+    ) {
       updatePointOfInterest.description = data.description;
       updatePointOfInterest.adress = data.adress;
       updatePointOfInterest.latitude = data.latitude;
@@ -84,10 +88,8 @@ export class PointOfInterestResolver {
       updatePointOfInterest.name = data.name;
     }
     updatePointOfInterest.updatedById = data.updatedById;
-    const datas = { ...updatePointOfInterest, categories: [category] }
-    return await dataSource
-      .getRepository(PointOfInterest)
-      .save(datas);
+    const datas = { ...updatePointOfInterest, categories: [category] };
+    return await dataSource.getRepository(PointOfInterest).save(datas);
   }
 
   ///////// MUTATION DELETE POINT OF INTEREST/////////////

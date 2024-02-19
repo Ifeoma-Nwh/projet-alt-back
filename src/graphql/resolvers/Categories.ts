@@ -43,7 +43,7 @@ export class CategoryResolver {
     if (updateCategory === null) {
       return null;
     }
-    if (data.icon != null && data.name != null) {
+    if (data.icon != null || data.name != null) {
       updateCategory.icon = data.icon;
       updateCategory.name = data.name;
     }

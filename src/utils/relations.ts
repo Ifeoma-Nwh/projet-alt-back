@@ -63,7 +63,7 @@ export const commentsRelations = [
   // "user.pointOfInterests",
   // "user.cities",
   "pointOfInterest",
-  "pointOfInterest.user",
+  //"pointOfInterest.user",
   // "pointOfInterest.city",
 ];
 export const categoriesRelations = [
